@@ -1,4 +1,4 @@
-# VIVEQA_Sinchana_Digital_Design_assignment_Day_7
+# VIVEQA_Sinchana_Digital_Design_assignment_Day_8
 
 # Digital Logic Design Assignments
 
