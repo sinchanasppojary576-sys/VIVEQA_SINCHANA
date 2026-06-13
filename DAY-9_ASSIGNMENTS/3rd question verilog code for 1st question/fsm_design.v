@@ -5,12 +5,12 @@ module fsm(
     output reg out
 );
 
-parameter S0 = 2'b00,
-          S1 = 2'b01,
-          S2 = 2'b10,
-          S3 = 2'b11;
+parameter S0=2'b00,
+          S1=2'b01,
+          S2=2'b10,
+          S3=2'b11;
 
-reg [1:0] state, next_state;
+reg [1:0] state,next_state;
 
 // State Register
 always @(posedge clk) begin
@@ -24,8 +24,8 @@ end
 always @(posedge clk) begin
     if(rst)
         out <= 1'b0;
-    else if(state == S2 && din == 1'b0)   // 110 detected
-        out <= ~out;
+    else if(state==S2 && din==1'b0)
+        out <= ~out;     // 110 detected
 end
 
 // Next State Logic
@@ -33,35 +33,26 @@ always @(*) begin
     case(state)
 
         S0: begin
-            if(din)
-                next_state = S1;
-            else
-                next_state = S0;
+            if(din) next_state = S1;
+            else    next_state = S0;
         end
 
         S1: begin
-            if(din)
-                next_state = S2;
-            else
-                next_state = S0;
+            if(din) next_state = S2;
+            else    next_state = S0;
         end
 
         S2: begin
-            if(din)
-                next_state = S2;
-            else
-                next_state = S3;
+            if(din) next_state = S2;
+            else    next_state = S3;
         end
 
         S3: begin
-            if(din)
-                next_state = S1;
-            else
-                next_state = S0;
+            if(din) next_state = S1;
+            else    next_state = S0;
         end
 
-        default:
-            next_state = S0;
+        default: next_state = S0;
 
     endcase
 end
