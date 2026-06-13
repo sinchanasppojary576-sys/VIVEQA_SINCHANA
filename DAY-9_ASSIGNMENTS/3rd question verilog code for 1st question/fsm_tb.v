@@ -1,0 +1,37 @@
+module fsm_tb;
+
+reg clk;
+reg rst;
+reg din;
+wire out;
+
+fsm dut(
+    .clk(clk),
+    .rst(rst),
+    .din(din),
+    .out(out)
+);
+
+always #5 clk = ~clk;
+
+initial begin
+    clk = 0;
+    rst = 1;
+    din = 0;
+
+    #10 rst = 0;
+
+    // 110 detected -> out toggles to 1
+    din = 1; #10;
+    din = 1; #10;
+    din = 0; #10;
+
+    // 110 detected again -> out toggles to 0
+    din = 1; #10;
+    din = 1; #10;
+    din = 0; #10;
+
+    #20 $finish;
+end
+
+endmodule
