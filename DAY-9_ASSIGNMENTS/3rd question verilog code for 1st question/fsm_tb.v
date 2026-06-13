@@ -1,8 +1,6 @@
 module fsm_tb;
 
-reg clk;
-reg rst;
-reg din;
+reg clk,rst,din;
 wire out;
 
 fsm dut(
@@ -21,15 +19,15 @@ initial begin
 
     #10 rst = 0;
 
-    // 110 detected -> out toggles to 1
-    din = 1; #10;
-    din = 1; #10;
-    din = 0; #10;
+    // 110 detected -> out=1
+    din=1; #10;
+    din=1; #10;
+    din=0; #10;
 
-    // 110 detected again -> out toggles to 0
-    din = 1; #10;
-    din = 1; #10;
-    din = 0; #10;
+    // 110 detected again -> out=0
+    din=1; #10;
+    din=1; #10;
+    din=0; #10;
 
     #20 $finish;
 end
