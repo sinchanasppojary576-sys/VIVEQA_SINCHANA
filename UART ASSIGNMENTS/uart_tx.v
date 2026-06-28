@@ -1,40 +1,104 @@
-`timescale 1ns / 1ps
-
-module led_controller(
+module uart_tx(
 
     input clk,
     input rst,
 
-    input rx_done,
-    input [7:0] rx_data,
+    input tx_start,
+    input [7:0] tx_data,
 
-    output reg [7:0] leds
+    output reg tx,
+    output reg tx_busy
 
 );
+
+parameter CLKS_PER_BIT = 2500;
+
+reg [12:0] clk_count;
+reg [3:0] bit_index;
+reg [2:0] state;
+
+localparam IDLE  = 0;
+localparam START = 1;
+localparam DATA  = 2;
+localparam STOP  = 3;
 
 always @(posedge clk or posedge rst)
 begin
 
     if(rst)
     begin
-        leds <= 8'b00000000;
+        tx <= 1'b1;
+        tx_busy <= 1'b0;
+        state <= IDLE;
+        clk_count <= 0;
+        bit_index <= 0;
     end
 
-    else if(rx_done)
+    else
     begin
 
-        case(rx_data)
+        case(state)
 
-            "1": leds[0] <= ~leds[0];
-            "2": leds[1] <= ~leds[1];
-            "3": leds[2] <= ~leds[2];
-            "4": leds[3] <= ~leds[3];
-            "5": leds[4] <= ~leds[4];
-            "6": leds[5] <= ~leds[5];
-            "7": leds[6] <= ~leds[6];
-            "8": leds[7] <= ~leds[7];
+        IDLE:
+        begin
+            tx <= 1'b1;
+            tx_busy <= 1'b0;
 
-            default: leds <= leds;
+            if(tx_start)
+            begin
+                tx_busy <= 1'b1;
+                state <= START;
+                clk_count <= 0;
+            end
+        end
+
+        START:
+        begin
+            tx <= 1'b0;
+
+            if(clk_count < CLKS_PER_BIT-1)
+                clk_count <= clk_count + 1;
+            else
+            begin
+                clk_count <= 0;
+                bit_index <= 0;
+                state <= DATA;
+            end
+        end
+
+        DATA:
+        begin
+
+            tx <= tx_data[bit_index];
+
+            if(clk_count < CLKS_PER_BIT-1)
+                clk_count <= clk_count + 1;
+            else
+            begin
+                clk_count <= 0;
+
+                if(bit_index < 7)
+                    bit_index <= bit_index + 1;
+                else
+                    state <= STOP;
+            end
+
+        end
+
+        STOP:
+        begin
+
+            tx <= 1'b1;
+
+            if(clk_count < CLKS_PER_BIT-1)
+                clk_count <= clk_count + 1;
+            else
+            begin
+                state <= IDLE;
+                clk_count <= 0;
+            end
+
+        end
 
         endcase
 
