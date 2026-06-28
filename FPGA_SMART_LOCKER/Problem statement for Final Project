@@ -1,2 +1,13 @@
-Problem Statement:
+Problem Title:
 FPGA-Based Smart Security Locker with Camera Monitoring and Telegram Alerts
+
+Project Description:
+This project implements a smart security locker using an Artix-7 FPGA as the main controller. Users authenticate themselves through a 4×4 keypad by entering a password. 
+When the correct password is entered, the FPGA unlocks the locker using a servo motor, turns ON the green LED, and displays 1111 on the MAX7219 seven-segment display.
+When an incorrect password is entered, the FPGA activates the red LED, buzzer, and displays 9999. Simultaneously, a UART command is sent to the ESP32-C3, which triggers
+the ESP32-CAM to capture an image of the unauthorized user. The captured image is then transmitted to a Telegram bot, providing real-time security alerts and remote monitoring.
+The project demonstrates the integration of FPGA, embedded systems, UART communication, and IoT technologies to develop an intelligent and reliable security system.
+
+Team Members:
+Sinchana
+Pranam U
