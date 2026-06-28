@@ -1,3 +1,4 @@
+
 `timescale 1ns / 1ps
 
 module uart_button_led_top(
@@ -14,7 +15,6 @@ module uart_button_led_top(
 
 );
 
-
 wire [7:0] ascii_char;
 wire button_valid;
 
@@ -27,24 +27,12 @@ wire rx_done;
 
 reg [15:0] buttons_d;
 
-
-reg [7:0] name_mem [0:7];
-
-initial
-begin
-    name_mem[0] = "S";
-    name_mem[1] = "i";
-    name_mem[2] = "n";
-    name_mem[3] = "c";
-    name_mem[4] = "h";
-    name_mem[5] = "a";
-    name_mem[6] = "n";
-    name_mem[7] = "a";
-end
-
-reg sending_name;
+reg [3:0] state;
 reg [2:0] char_index;
 
+localparam IDLE = 4'd0;
+localparam SEND = 4'd1;
+localparam WAIT = 4'd2;
 
 button_decoder u_decoder(
     .buttons(buttons),
@@ -53,41 +41,28 @@ button_decoder u_decoder(
 );
 
 uart_tx u_tx(
-
     .clk(clk),
     .rst(rst),
-
     .tx_start(tx_start),
     .tx_data(tx_data),
-
     .tx(uart_tx),
     .tx_busy(tx_busy)
-
 );
 
 uart_rx u_rx(
-
     .clk(clk),
     .rst(rst),
-
     .rx(uart_rx),
-
     .rx_data(rx_data),
     .rx_done(rx_done)
-
 );
 
-
 led_controller u_led(
-
     .clk(clk),
     .rst(rst),
-
     .rx_done(rx_done),
     .rx_data(rx_data),
-
     .leds(leds)
-
 );
 
 always @(posedge clk or posedge rst)
@@ -95,11 +70,11 @@ begin
 
     if(rst)
     begin
-        buttons_d    <= 16'h0000;
-        tx_start     <= 1'b0;
-        tx_data      <= 8'h00;
-        sending_name <= 1'b0;
-        char_index   <= 3'd0;
+        buttons_d  <= 16'h0000;
+        tx_start   <= 1'b0;
+        tx_data    <= 8'h00;
+        state      <= IDLE;
+        char_index <= 3'd0;
     end
 
     else
@@ -107,34 +82,66 @@ begin
 
         tx_start <= 1'b0;
 
-       
-        if((buttons != 16'h0000) &&
-           (buttons_d == 16'h0000) &&
-           button_valid &&
-           !sending_name)
-        begin
-            sending_name <= 1'b1;
-            char_index   <= 3'd0;
-        end
+        case(state)
 
-    
-
-        if(sending_name && !tx_busy)
+        IDLE:
         begin
 
-            tx_data  <= name_mem[char_index];
-            tx_start <= 1'b1;
-
-            if(char_index == 3'd7)
+            if((buttons != 16'h0000) &&
+               (buttons_d == 16'h0000))
             begin
-                sending_name <= 1'b0;
-            end
-            else
-            begin
-                char_index <= char_index + 1'b1;
+                char_index <= 3'd0;
+                state <= SEND;
             end
 
         end
+
+        SEND:
+        begin
+
+            if(!tx_busy)
+            begin
+
+                case(char_index)
+                    3'd0: tx_data <= "S";
+                    3'd1: tx_data <= "i";
+                    3'd2: tx_data <= "n";
+                    3'd3: tx_data <= "c";
+                    3'd4: tx_data <= "h";
+                    3'd5: tx_data <= "a";
+                    3'd6: tx_data <= "n";
+                    3'd7: tx_data <= "a";
+                endcase
+
+                tx_start <= 1'b1;
+                state <= WAIT;
+
+            end
+
+        end
+
+        WAIT:
+        begin
+
+            if(tx_busy)
+            begin
+
+                if(char_index == 3'd7)
+                    state <= IDLE;
+                else
+                begin
+                    char_index <= char_index + 1'b1;
+                    state <= SEND;
+                end
+
+            end
+
+        end
+
+        default:
+            state <= IDLE;
+
+        endcase
 
         buttons_d <= buttons;
 
@@ -143,3 +150,4 @@ begin
 end
 
 endmodule
+
