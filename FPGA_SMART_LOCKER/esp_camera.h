@@ -3,8 +3,8 @@
 #include <WiFiClientSecure.h>
 #include "esp_camera.h"
 
-const char* ssid = "Pranam";
-const char* password = "1234567890";
+const char* ssid = "Y";
+const char* password = "Z";
 
 String BOTtoken = "YOUR_NEW_BOT_TOKEN";
 String CHAT_ID  = "xxx";
