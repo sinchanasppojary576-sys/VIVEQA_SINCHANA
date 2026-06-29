@@ -1,7 +1,7 @@
 #include <WiFi.h>
 #include <HTTPClient.h>
 
-const char* ssid = "Y";//
+const char* ssid = "Y";
 const char* password = "Z";
 
 String cameraIP = "x.x.x.x";
